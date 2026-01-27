@@ -1,3 +1,6 @@
+# PowerShell script to hide ScreenConnect from Control Panel and Taskbar
+# This script hides "ScreenConnect Client" from Programs and Features
+# Usage: .\screenconnecthide.ps1
 
 param(
 )
@@ -19,13 +22,13 @@ $registryPaths = @(
 $found = $false
 $hiddenCount = 0
 
-Write-Host "Searching for xyzzy installations..." -ForegroundColor Yellow
+Write-Host "Searching for ScreenConnect installations..." -ForegroundColor Yellow
 
-# Search for xyzzy in registry
+# Search for ScreenConnect in registry
 foreach ($regPath in $registryPaths) {
     $uninstallKeys = Get-ItemProperty -Path $regPath -ErrorAction SilentlyContinue | Where-Object {
-        ($_.DisplayName -like "*xyzzy*" -or $_.DisplayName -like "*xyzzy Client*") -and
-        ($_.Publisher -like "*xyzzy*" -or $_.Publisher -like "*xyzzy Software*")
+        ($_.DisplayName -like "*ScreenConnect*" -or $_.DisplayName -like "*ScreenConnect Client*") -and
+        ($_.Publisher -like "*ScreenConnect*" -or $_.Publisher -like "*ScreenConnect Software*")
     }
     
     foreach ($key in $uninstallKeys) {
@@ -58,7 +61,7 @@ foreach ($regPath in $registryPaths) {
 }
 
 # Hide from Taskbar by modifying Start Menu shortcuts
-Write-Host "`nHiding xyzzy from Taskbar..." -ForegroundColor Yellow
+Write-Host "`nHiding ScreenConnect from Taskbar..." -ForegroundColor Yellow
 
 $taskbarPaths = @(
     "$env:APPDATA\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar",
@@ -69,7 +72,7 @@ $taskbarPaths = @(
 
 foreach ($path in $taskbarPaths) {
     if (Test-Path $path) {
-        $shortcuts = Get-ChildItem -Path $path -Recurse -Filter "*xyzzy*" -ErrorAction SilentlyContinue
+        $shortcuts = Get-ChildItem -Path $path -Recurse -Filter "*ScreenConnect*" -ErrorAction SilentlyContinue
         foreach ($shortcut in $shortcuts) {
             try {
                 # Hide the shortcut file
@@ -82,37 +85,37 @@ foreach ($path in $taskbarPaths) {
     }
 }
 
-# Hide system tray icon without stopping xyzzy processes
-Write-Host "`nHiding xyzzy system tray icon (keeping process running)..." -ForegroundColor Yellow
+# Hide system tray icon without stopping ScreenConnect processes
+Write-Host "`nHiding ScreenConnect system tray icon (keeping process running)..." -ForegroundColor Yellow
 
-# Find xyzzy processes (we'll keep them running)
+# Find ScreenConnect processes (we'll keep them running)
 $processes = Get-Process | Where-Object { 
-    $_.ProcessName -like "*xyzzy*" -or 
-    $_.MainWindowTitle -like "*xyzzy*" -or
-    $_.Path -like "*xyzzy*"
+    $_.ProcessName -like "*ScreenConnect*" -or 
+    $_.MainWindowTitle -like "*ScreenConnect*" -or
+    $_.Path -like "*ScreenConnect*"
 }
 
 if ($processes) {
-    Write-Host "Found xyzzy processes (keeping them running)..." -ForegroundColor Cyan
+    Write-Host "Found ScreenConnect processes (keeping them running)..." -ForegroundColor Cyan
     foreach ($proc in $processes) {
         Write-Host "  - Process: $($proc.ProcessName) (PID: $($proc.Id)) - Still Running" -ForegroundColor Gray
     }
     Write-Host "  ✓ Processes are still running (not stopped)" -ForegroundColor Green
 } else {
-    Write-Host "  No xyzzy processes currently running." -ForegroundColor Gray
+    Write-Host "  No ScreenConnect processes currently running." -ForegroundColor Gray
 }
 
 # Hide icon from notification area
 Write-Host "`nHiding icon from notification area..." -ForegroundColor Yellow
 
-# Get xyzzy executable path
-$xyzzyPath = $null
-$xyzzyExe = $null
+# Get ScreenConnect executable path
+$screenConnectPath = $null
+$screenConnectExe = $null
 if ($processes) {
-    $xyzzyPath = ($processes | Select-Object -First 1).Path
-    if ($xyzzyPath) {
-        $xyzzyExe = Split-Path -Leaf $xyzzyPath
-        Write-Host "  ✓ Found xyzzy: $xyzzyExe" -ForegroundColor Green
+    $screenConnectPath = ($processes | Select-Object -First 1).Path
+    if ($screenConnectPath) {
+        $screenConnectExe = Split-Path -Leaf $screenConnectPath
+        Write-Host "  ✓ Found ScreenConnect: $screenConnectExe" -ForegroundColor Green
     }
 }
 
@@ -164,11 +167,11 @@ try {
     Write-Host "  ⚠ Some methods unavailable: $_" -ForegroundColor Yellow
 }
 
-Write-Host "`nIMPORTANT: To completely hide the system tray icon while keeping xyzzy running," -ForegroundColor Yellow
+Write-Host "`nIMPORTANT: To completely hide the system tray icon while keeping ScreenConnect running," -ForegroundColor Yellow
 Write-Host "you may need to manually set it to 'Always hide' in Windows notification area settings:" -ForegroundColor Yellow
 Write-Host "  1. Right-click the taskbar" -ForegroundColor Cyan
 Write-Host "  2. Select 'Taskbar settings' or 'Notification area'" -ForegroundColor Cyan
-Write-Host "  3. Find xyzzy icon" -ForegroundColor Cyan
+Write-Host "  3. Find ScreenConnect icon" -ForegroundColor Cyan
 Write-Host "  4. Set it to 'Always hide'" -ForegroundColor Cyan
 
 # Summary
@@ -177,16 +180,16 @@ Write-Host "HIDING SUMMARY" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 
 if ($found) {
-    Write-Host "xyzzy entries hidden: $hiddenCount" -ForegroundColor Green
-    Write-Host "`nxyzzy has been hidden from:" -ForegroundColor Green
+    Write-Host "ScreenConnect entries hidden: $hiddenCount" -ForegroundColor Green
+    Write-Host "`nScreenConnect has been hidden from:" -ForegroundColor Green
     Write-Host "  ✓ Control Panel > Programs and Features" -ForegroundColor Green
     Write-Host "  ✓ Taskbar shortcuts" -ForegroundColor Green
     Write-Host "  ✓ System tray (notification area)" -ForegroundColor Green
     Write-Host "`nNote: You may need to refresh Control Panel (F5) to see changes." -ForegroundColor Yellow
 } else {
-    Write-Host "No xyzzy installations found in registry." -ForegroundColor Yellow
+    Write-Host "No ScreenConnect installations found in registry." -ForegroundColor Yellow
     Write-Host "This could mean:" -ForegroundColor Yellow
-    Write-Host "  - xyzzy is not installed" -ForegroundColor Yellow
+    Write-Host "  - ScreenConnect is not installed" -ForegroundColor Yellow
     Write-Host "  - It's installed in a non-standard location" -ForegroundColor Yellow
     Write-Host "  - It uses a different display name" -ForegroundColor Yellow
 }
